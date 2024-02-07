@@ -15,11 +15,24 @@ public enum TokenType {
 
  
      // keywords
-     METHOD,
-     WHILE,
-     IF,
-     CLASS,
-     CONSTRUCTOR,
+     WHILE, CLASS,CONSTRUCTOR,FUNCTION,
+     METHOD,FIELD,STATIC,VAR,INT,
+     CHAR,BOOLEAN,VOID,TRUE,FALSE,
+     NULL,THIS,LET,DO,IF,ELSE, RETURN,
+ 
+    
+     // symbols
+     LPAREN,RPAREN,
+     LBRACE, RBRACE,
+     LBRACKET,RBRACKET,
+ 
+     COMMA, SEMICOLON, DOT,
+   
+     ASTERISK, SLASH,
+ 
+     AND, OR, NOT,
+ 
+     LT, GT, EQ,
 
      EOF,
 
