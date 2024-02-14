@@ -12,57 +12,66 @@ import br.ufma.ecp.token.TokenType;
 
 
 
-public class ScannerTest extends TestSupport {
-
+public class ParserTest extends TestSupport {
 
     @Test
-    public void testSimple () {
-        String input = "45  + if + \"ola mundo\" - 876";
-        Scanner scan = new Scanner (input.getBytes());
-        for (Token tk = scan.nextToken(); tk.type != TokenType.EOF; tk = scan.nextToken()) {
-            System.out.println(tk);
-        }
-    }
-    
-    @Test
-    public void testScannerWithSquareGame() throws IOException {
-        var input = fromFile("Square/SquareGame.jack");
-        var expectedResult =  fromFile("Square/SquareGameT.xml");
+    public void testParseTermInteger () {
+      var input = "10;";
+      var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+      parser.parseTerm();
+      var expectedResult =  """
+        <term>
+        <integerConstant> 10 </integerConstant>
+        </term>
+        """;
 
-        var scanner = new Scanner(input.getBytes(StandardCharsets.UTF_8));
-        var result = new StringBuilder();
-        
-        result.append("<tokens>\r\n");
+        var result = parser.XMLOutput();
+        expectedResult = expectedResult.replaceAll("  ", "");
+        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
+        assertEquals(expectedResult, result);    
 
-        for (Token tk = scanner.nextToken(); tk.type !=TokenType.EOF; tk = scanner.nextToken()) {
-            result.append(String.format("%s\r\n",tk.toString()));
-        }
-
-        result.append("</tokens>\r\n");
-        
-        assertEquals(expectedResult, result.toString());
     }
 
 
     @Test
-    public void testScannerWithSquare() throws IOException {
-        var input = fromFile("Square/Square.jack");
-        var expectedResult =  fromFile("Square/SquareT.xml");
+    public void testParseTermIdentifer() {
+        var input = "varName;";
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parseTerm();
 
-        var scanner = new Scanner(input.getBytes(StandardCharsets.UTF_8));
-        var result = new StringBuilder();
-        
-        result.append("<tokens>\r\n");
+        var expectedResult =  """
+          <term>
+          <identifier> varName </identifier>
+          </term>
+          """;
 
-        for (Token tk = scanner.nextToken(); tk.type !=TokenType.EOF; tk = scanner.nextToken()) {
-            result.append(String.format("%s\r\n",tk.toString()));
-        }
-        
-        result.append("</tokens>\r\n");
-        System.out.println(result.toString());
-        assertEquals(expectedResult, result.toString());
+          var result = parser.XMLOutput();
+          expectedResult = expectedResult.replaceAll("  ", "");
+          result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
+          assertEquals(expectedResult, result);    
+
     }
 
-    
-    
+
+
+    @Test
+    public void testParseTermString() {
+        var input = "\"Hello World\"";
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parseTerm();
+
+        var expectedResult =  """
+          <term>
+          <stringConstant> Hello World </stringConstant>
+          </term>
+          """;
+
+          var result = parser.XMLOutput();
+          expectedResult = expectedResult.replaceAll("  ", "");
+          result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
+          assertEquals(expectedResult, result);    
+
+    }
+
+
 }
