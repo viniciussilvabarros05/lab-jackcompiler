@@ -141,6 +141,26 @@ public class ParserTest extends TestSupport {
           assertEquals(expectedResult, result);    
 
     }
+    @Test
+    public void testParseDo() {
+        var input = "do hello();";
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parseDo();
+
+        var expectedResult = """
+            <doStatement>
+            <keyword> do </keyword>
+            <identifier> hello </identifier>
+            <symbol> ( </symbol>
+            <symbol> ) </symbol>
+            <symbol> ; </symbol>
+          </doStatement>
+                """;
+        var result = parser.XMLOutput();
+        expectedResult = expectedResult.replaceAll("  ", "");
+        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
+        assertEquals(expectedResult, result);
+    }
 
 
 }

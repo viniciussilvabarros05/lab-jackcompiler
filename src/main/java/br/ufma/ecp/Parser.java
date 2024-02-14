@@ -26,6 +26,14 @@ public class Parser {
      public void parse () {
          
      }
+     // 'do' subroutineCall ';'
+     public void parseDo() {
+        printNonTerminal("doStatement");
+        expectPeek(DO);
+        parseSubroutineCall();
+        expectPeek(SEMICOLON);
+        printNonTerminal("/doStatement");
+     }
        //identifier '(' ')'
        void parseSubroutineCall() {
         expectPeek(IDENT);
