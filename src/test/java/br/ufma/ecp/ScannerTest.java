@@ -12,155 +12,76 @@ import br.ufma.ecp.token.TokenType;
 
 
 
-public class ParserTest extends TestSupport {
+public class ScannerTest extends TestSupport {
+
 
     @Test
-    public void testParseTermInteger () {
-      var input = "10;";
-      var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-      parser.parseTerm();
-      var expectedResult =  """
-        <term>
-        <integerConstant> 10 </integerConstant>
-        </term>
-        """;
-
-        var result = parser.XMLOutput();
-        expectedResult = expectedResult.replaceAll("  ", "");
-        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
-        assertEquals(expectedResult, result);    
-
+    public void testSimple () {
+        String input = "45  + if + \"ola mundo\" - 876";
+        Scanner scan = new Scanner (input.getBytes());
+        for (Token tk = scan.nextToken(); tk.type != TokenType.EOF; tk = scan.nextToken()) {
+            System.out.println(tk);
+        }
     }
-
-
+    
     @Test
-    public void testParseTermIdentifer() {
-        var input = "varName;";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseTerm();
+    public void testScannerWithSquareGame() throws IOException {
+        var input = fromFile("Square/SquareGame.jack");
+        var expectedResult =  fromFile("Square/SquareGameT.xml");
 
-        var expectedResult =  """
-          <term>
-          <identifier> varName </identifier>
-          </term>
-          """;
-
-          var result = parser.XMLOutput();
-          expectedResult = expectedResult.replaceAll("  ", "");
-          result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
-          assertEquals(expectedResult, result);    
-
-    }
-
-
-
-    @Test
-    public void testParseTermString() {
-        var input = "\"Hello World\"";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseTerm();
-
-        var expectedResult =  """
-          <term>
-          <stringConstant> Hello World </stringConstant>
-          </term>
-          """;
-
-          var result = parser.XMLOutput();
-          expectedResult = expectedResult.replaceAll("  ", "");
-          result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
-          assertEquals(expectedResult, result);    
-
-    }
-    @Test
-    public void testParseExpressionSimple() {
-        var input = "10+20";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseExpression();
+        var scanner = new Scanner(input.getBytes(StandardCharsets.UTF_8));
+        var result = new StringBuilder();
         
-        var expectedResult =  """
-          <expression>
-          <term>
-          <integerConstant> 10 </integerConstant>
-          </term>
-          <symbol> + </symbol>
-          <term>
-          <integerConstant> 20 </integerConstant>
-          </term>
-          </expression>
-          """;
-              
-          var result = parser.XMLOutput();
-          result = result.replaceAll("\r", ""); 
-          expectedResult = expectedResult.replaceAll("  ", "");
-          assertEquals(expectedResult, result);    
+        result.append("<tokens>\r\n");
 
-    }
-    @Test
-    public void testParseLetSimple() {
-        var input = "let var1 = 10+20;";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseLet();
-				var expectedResult =  """
-	     <letStatement>
-        <keyword> let </keyword>
-        <identifier> var1 </identifier>
-        <symbol> = </symbol>
-        <expression>
-          <term>
-          <integerConstant> 10 </integerConstant>
-          </term>
-          <symbol> + </symbol>
-          <term>
-          <integerConstant> 20 </integerConstant>
-          </term>
-          </expression>
-        <symbol> ; </symbol>
-      </letStatement> 
-				""";
-        var result = parser.XMLOutput();
-        expectedResult = expectedResult.replaceAll("  ", "");
-        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
-        assertEquals(expectedResult, result);
-    }
-    @Test
-    public void testParseSubroutineCall() {
-        var input = "hello()";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseSubroutineCall();
+        for (Token tk = scanner.nextToken(); tk.type !=TokenType.EOF; tk = scanner.nextToken()) {
+            result.append(String.format("%s\r\n",tk.toString()));
+        }
+
+        result.append("</tokens>\r\n");
         
-        var expectedResult =  """
-          <identifier> hello </identifier>
-          <symbol> ( </symbol>
-          <symbol> ) </symbol
-          """;
-              
-          var result = parser.XMLOutput();
-          result = result.replaceAll("\r", ""); 
-          expectedResult = expectedResult.replaceAll("  ", "");
-          assertEquals(expectedResult, result);    
-
+        assertEquals(expectedResult, result.toString());
     }
+
     @Test
-    public void testParseDo() {
-        var input = "do hello();";
-        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-        parser.parseDo();
+    public void testScannerAula() throws IOException {
+        var input = fromFile("Square/Main.jack");
+        var expectedResult =  fromFile("Square/MainT.xml");
 
-        var expectedResult = """
-            <doStatement>
-            <keyword> do </keyword>
-            <identifier> hello </identifier>
-            <symbol> ( </symbol>
-            <symbol> ) </symbol>
-            <symbol> ; </symbol>
-          </doStatement>
-                """;
-        var result = parser.XMLOutput();
-        expectedResult = expectedResult.replaceAll("  ", "");
-        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
-        assertEquals(expectedResult, result);
+        var scan = new Scanner(input.getBytes(StandardCharsets.UTF_8));
+        var result = new StringBuilder();
+        
+        result.append("<tokens>\r\n");
+
+        for (Token tk = scan.nextToken(); tk.type !=TokenType.EOF; tk = scan.nextToken()) {
+            result.append(String.format("%s\r\n",tk.toString()));
+        }
+
+        result.append("</tokens>\r\n");
+        
+        assertEquals(expectedResult, result.toString());
     }
 
 
+    @Test
+    public void testScannerWithSquare() throws IOException {
+        var input = fromFile("Square/Square.jack");
+        var expectedResult =  fromFile("Square/SquareT.xml");
+
+        var scanner = new Scanner(input.getBytes(StandardCharsets.UTF_8));
+        var result = new StringBuilder();
+        
+        result.append("<tokens>\r\n");
+
+        for (Token tk = scanner.nextToken(); tk.type !=TokenType.EOF; tk = scanner.nextToken()) {
+            result.append(String.format("%s\r\n",tk.toString()));
+        }
+        
+        result.append("</tokens>\r\n");
+        System.out.println(result.toString());
+        assertEquals(expectedResult, result.toString());
+    }
+
+    
+    
 }
