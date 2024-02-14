@@ -26,6 +26,15 @@ public class Parser {
      public void parse () {
          
      }
+     void parseExpression() {
+        printNonTerminal("expression");
+        parseTerm ();
+        while (isOperator(peekToken.lexeme)) {
+            expectPeek(peekToken.type);
+            parseTerm();
+        }
+        printNonTerminal("/expression");
+  }
      void parseTerm() {
         printNonTerminal("term");
         switch (peekToken.type) {
@@ -52,7 +61,10 @@ public class Parser {
     
         printNonTerminal("/term");
       }
- 
+    //função auxiliar para identificar se temos um operador
+    static public boolean isOperator(String op) {
+        return op!= "" && "+-*/<>=~&|".contains(op);
+   }
      // funções auxiliares
      public String XMLOutput() {
          return xmlOutput.toString();
