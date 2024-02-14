@@ -26,6 +26,23 @@ public class Parser {
      public void parse () {
          
      }
+     //letStatement -> 'let' identifier( '[' expression ']' )? '=' expression ';’ regra do comando let
+     void parseLet() {
+        printNonTerminal("letStatement");
+        expectPeek(LET);
+        expectPeek(IDENT);
+
+        if (peekTokenIs(LBRACKET)) {
+            expectPeek(LBRACKET);
+            parseExpression();
+            expectPeek(RBRACKET);
+        }
+
+        expectPeek(EQ);
+        parseExpression();
+        expectPeek(SEMICOLON);
+        printNonTerminal("/letStatement");
+    }
      void parseExpression() {
         printNonTerminal("expression");
         parseTerm ();
