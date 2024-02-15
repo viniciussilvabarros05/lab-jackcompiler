@@ -26,6 +26,21 @@ public class Parser {
      public void parse () {
          
      }
+     void parseClassVarDec() {
+        printNonTerminal("classVarDec");
+        expectPeek(FIELD, STATIC);
+        // 'int' | 'char' | 'boolean' | className
+        expectPeek(INT, CHAR, BOOLEAN, IDENT);
+        expectPeek(IDENT);
+
+        while (peekTokenIs(COMMA)) {
+            expectPeek(COMMA);
+            expectPeek(IDENT);
+        }
+
+        expectPeek(SEMICOLON);
+        printNonTerminal("/classVarDec");
+    }
      void parseVarDec() {
         printNonTerminal("varDec");
         expectPeek(VAR);
