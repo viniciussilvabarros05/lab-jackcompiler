@@ -17,6 +17,8 @@ public class Parser {
     //private String xmlOutput = "";
     private StringBuilder xmlOutput = new StringBuilder();
 
+    private VMWriter vmWriter = new VMWriter();
+
     public Parser(byte[] input) {
         scan = new Scanner(input);
         nextToken();
@@ -381,5 +383,7 @@ public class Parser {
     }
 
 
-
+    public String VMOutput() {
+            return vmWriter.vmOutput();
+    }
 }
