@@ -2,7 +2,7 @@ package br.ufma.ecp;
 
 import static br.ufma.ecp.token.TokenType.*;
 
-
+import br.ufma.ecp.VMWriter.Segment;
 import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
 
@@ -272,8 +272,10 @@ public class Parser {
         printNonTerminal("expression");
         parseTerm ();
         while (isOperator(peekToken.lexeme)) {
+            var ope = peekToken.type;
             expectPeek(peekToken.type);
             parseTerm();
+            compileOperators(ope);
         }
         printNonTerminal("/expression");
   }
@@ -283,7 +285,8 @@ public class Parser {
         printNonTerminal("term");
         switch (peekToken.type) {
             case NUMBER:
-                expectPeek(NUMBER);
+            expectPeek(TokenType.NUMBER);
+            vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
                 break;
             case STRING:
                 expectPeek(STRING);
