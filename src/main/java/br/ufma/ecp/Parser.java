@@ -9,13 +9,13 @@ import br.ufma.ecp.token.TokenType;
 
 public class Parser {
 
-
-    private static class ParseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {
+    }
 
     private Scanner scan;
     private Token currentToken;
     private Token peekToken;
-    //private String xmlOutput = "";
+    // private String xmlOutput = "";
     private StringBuilder xmlOutput = new StringBuilder();
 
     private VMWriter vmWriter = new VMWriter();
@@ -39,12 +39,12 @@ public class Parser {
         expectPeek(CLASS);
         expectPeek(IDENT);
         expectPeek(LBRACE);
-        
+
         while (peekTokenIs(STATIC) || peekTokenIs(FIELD)) {
             System.out.println(peekToken);
             parseClassVarDec();
         }
-    
+
         while (peekTokenIs(FUNCTION) || peekTokenIs(CONSTRUCTOR) || peekTokenIs(METHOD)) {
             parseSubroutineDec();
         }
@@ -267,6 +267,7 @@ public class Parser {
 
         printNonTerminal("/expressionList");
     }
+
     public void compileOperators(TokenType type) {
 
         if (type == ASTERISK) {
@@ -295,10 +296,11 @@ public class Parser {
             return Command.OR;
         return null;
     }
+
     // expression -> term (op term)*
     void parseExpression() {
         printNonTerminal("expression");
-        parseTerm ();
+        parseTerm();
         while (isOperator(peekToken.lexeme)) {
             var ope = peekToken.type;
             expectPeek(peekToken.type);
@@ -306,18 +308,25 @@ public class Parser {
             compileOperators(ope);
         }
         printNonTerminal("/expression");
-  }
+    }
 
     // term -> number | identifier | stringConstant | keywordConstant
     void parseTerm() {
         printNonTerminal("term");
         switch (peekToken.type) {
             case NUMBER:
-            expectPeek(TokenType.NUMBER);
-            vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
+                expectPeek(TokenType.NUMBER);
+                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
                 break;
             case STRING:
-                expectPeek(STRING);
+                expectPeek(TokenType.STRING);
+                var strValue = currentToken.lexeme;
+                vmWriter.writePush(Segment.CONST, strValue.length());
+                vmWriter.writeCall("String.new", 1);
+                for (int i = 0; i < strValue.length(); i++) {
+                    vmWriter.writePush(Segment.CONST, strValue.charAt(i));
+                    vmWriter.writeCall("String.appendChar", 2);
+                }
                 break;
             case FALSE:
             case NULL:
@@ -334,7 +343,7 @@ public class Parser {
                         expectPeek(LBRACKET);
                         parseExpression();
                         expectPeek(RBRACKET);
-                    } 
+                    }
                 }
                 break;
             case LPAREN:
@@ -355,8 +364,9 @@ public class Parser {
 
     // funções auxiliares
     static public boolean isOperator(String op) {
-        return op!= "" && "+-*/<>=~&|".contains(op);
-   }
+        return op != "" && "+-*/<>=~&|".contains(op);
+    }
+
     public String XMLOutput() {
         return xmlOutput.toString();
     }
@@ -364,7 +374,6 @@ public class Parser {
     private void printNonTerminal(String nterminal) {
         xmlOutput.append(String.format("<%s>\r\n", nterminal));
     }
-
 
     boolean peekTokenIs(TokenType type) {
         return peekToken.type == type;
@@ -382,7 +391,7 @@ public class Parser {
             }
         }
 
-        //throw new Error("Syntax error");
+        // throw new Error("Syntax error");
         throw error(peekToken, "Expected a statement");
 
     }
@@ -392,17 +401,15 @@ public class Parser {
             nextToken();
             xmlOutput.append(String.format("%s\r\n", currentToken.toString()));
         } else {
-            throw error(peekToken, "Expected "+type.name());
+            throw error(peekToken, "Expected " + type.name());
         }
     }
 
-
     private static void report(int line, String where,
-        String message) {
-            System.err.println(
-            "[line " + line + "] Error" + where + ": " + message);
+            String message) {
+        System.err.println(
+                "[line " + line + "] Error" + where + ": " + message);
     }
-
 
     private ParseError error(Token token, String message) {
         if (token.type == TokenType.EOF) {
@@ -413,8 +420,7 @@ public class Parser {
         return new ParseError();
     }
 
-
     public String VMOutput() {
-            return vmWriter.vmOutput();
+        return vmWriter.vmOutput();
     }
 }
