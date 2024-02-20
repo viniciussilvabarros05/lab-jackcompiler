@@ -253,7 +253,7 @@ public class Parser {
         expectPeek(RBRACE);
         printNonTerminal("/subroutineBody");
     }
-    
+
     // letStatement -> 'let' identifier( '[' expression ']' )? '=' expression ';'
     void parseLet() {
 
