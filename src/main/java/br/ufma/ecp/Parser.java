@@ -3,6 +3,7 @@ package br.ufma.ecp;
 import static br.ufma.ecp.token.TokenType.*;
 
 import br.ufma.ecp.SymbolTable.Kind;
+import br.ufma.ecp.SymbolTable.Symbol;
 import br.ufma.ecp.VMWriter.Command;
 import br.ufma.ecp.VMWriter.Segment;
 import br.ufma.ecp.token.Token;
@@ -220,19 +221,35 @@ public class Parser {
 
     // letStatement -> 'let' identifier( '[' expression ']' )? '=' expression ';'
     void parseLet() {
-        printNonTerminal("letStatement");
-        expectPeek(LET);
-        expectPeek(IDENT);
 
-        if (peekTokenIs(LBRACKET)) {
-            expectPeek(LBRACKET);
-            parseExpression();
-            expectPeek(RBRACKET);
+        var isArray = false;
+
+        printNonTerminal("letStatement");
+        expectPeek(TokenType.LET);
+        expectPeek(TokenType.IDENT);
+
+        var symbol = symbolTable.resolve(currentToken.lexeme);
+
+        if (peekTokenIs(TokenType.LBRACKET)) {
+            expectPeek(TokenType.LBRACKET);
+            parseExpression();         
+            expectPeek(TokenType.RBRACKET);
+
+            isArray = true;
         }
 
-        expectPeek(EQ);
+        expectPeek(TokenType.EQ);
         parseExpression();
-        expectPeek(SEMICOLON);
+
+        if (isArray) {
+    
+
+        } else {
+            vmWriter.writePop(kind2Segment(symbol.kind()), symbol.index());
+        }
+
+
+        expectPeek(TokenType.SEMICOLON);
         printNonTerminal("/letStatement");
     }
 
@@ -411,6 +428,18 @@ public class Parser {
         printNonTerminal("/expression");
     }
 
+    private Segment kind2Segment(Kind kind) {
+        if (kind == Kind.STATIC)
+            return Segment.STATIC;
+        if (kind == Kind.FIELD)
+            return Segment.THIS;
+        if (kind == Kind.VAR)
+            return Segment.LOCAL;
+        if (kind == Kind.ARG)
+            return Segment.ARG;
+        return null;
+    }
+
     // term -> number | identifier | stringConstant | keywordConstant
     void parseTerm() {
         printNonTerminal("term");
@@ -443,6 +472,7 @@ public class Parser {
                 break;
             case IDENT:
                 expectPeek(IDENT);
+                 Symbol sym = symbolTable.resolve(currentToken.lexeme);
                 if (peekTokenIs(LPAREN) || peekTokenIs(DOT)) {
                     parseSubroutineCall();
                 } else { // variavel comum ou array
@@ -450,6 +480,8 @@ public class Parser {
                         expectPeek(LBRACKET);
                         parseExpression();
                         expectPeek(RBRACKET);
+                    }else {
+                        vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
                     }
                 }
                 break;
